@@ -534,7 +534,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19050be19dd781040b5f23f3d853e605, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  position: {x: 2, y: 0, z: 0}
+  position: {x: 5, y: 0, z: 0}
   arcHeight: {x: 0, y: 5, z: 0}
   time: 2
   easeTween: 0
