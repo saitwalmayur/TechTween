@@ -188,6 +188,7 @@ using UnityEngine.UI;
             tween.arcHeight = arcHeight;
             tween.time = time;
             tween.delay = delay;
+        tween.isLocal = isLocal;
             tween.techTween = gameObject.AddComponent<TechTween>();
             tween.techTween.tweenDetail = tween;
             tween.StartJump();
@@ -622,33 +623,31 @@ using UnityEngine.UI;
                 {
                     float progress = elapsedTime / time;
                     float parabola = 1.0f - 4.0f * (progress - 0.5f) * (progress - 0.5f);
-                    Vector3 nextPos = Vector3.Lerp(from, to, progress);
-                    nextPos.x += parabola * arcHeight.x;
-                    nextPos.y += parabola * arcHeight.y;
-                    nextPos.z += parabola * arcHeight.z;
-                    if (trans != null)
-                    {
-                        trans.position = nextPos;
-                    }
-                    if (rectTrans != null)
-                    {
-                        rectTrans.anchoredPosition = nextPos;
-                    }
+                    SetArcValue(parabola,GetValue(progress));
+                  
                 }
                 else
                 {
-                    if (trans != null)
-                    {
-                        trans.position = to;
-                    }
-                    if (rectTrans != null)
-                    {
-                        rectTrans.anchoredPosition = to;
-                    }
-                    tweenUpdates.OnTweenComplete?.Invoke();
+                float parabola = 1.0f - 4.0f * (1 - 0.5f) * (1 - 0.5f);
+                SetArcValue(parabola, GetValue(1));
+                SetValues(1);
+                action?.Invoke();
+                tweenUpdates.OnTweenComplete?.Invoke();
+                loopCount++;
+                if (isPingPong)
+                {
+                    isReversing = !isReversing;
+                }
+                if (isLooping || loopCount < repeat)
+                {
+                    startTime = Time.time; // Restart loop
+                }
+                else
+                {
                     isJumping = false;
                     GameObject.Destroy(techTween);
                 }
+            }
             }
             if (isRunning)
             {
@@ -681,7 +680,34 @@ using UnityEngine.UI;
                 }
             }
         }
-        private Vector3 startValue;
+    public void SetArcValue(float parabola, float valu)
+    {
+        // Determine the direction of the tween based on ping-pong
+        Vector3 start = isReversing ? to : from;
+        Vector3 end = isReversing ? from : to;
+        newVect = Vector3.Lerp(start, end, valu);
+        newVect.x += parabola * arcHeight.x;
+        newVect.y += parabola * arcHeight.y;
+        newVect.z += parabola * arcHeight.z;
+
+        if (trans != null)
+        {
+            if (isLocal)
+            {
+                trans.localPosition = newVect;
+            }
+            else
+            {
+                trans.position = newVect;
+            }
+      
+        }
+        if (rectTrans != null)
+        {
+            rectTrans.anchoredPosition = newVect;
+        }
+    }
+    private Vector3 startValue;
         public void StartTrignometroc()
         {
             startTime = Time.time + delay;
@@ -881,7 +907,7 @@ using UnityEngine.UI;
             }
         }
 
-        public void SetValues(float valu)
+    public void SetValues(float valu)
         {
             // Determine the direction of the tween based on ping-pong
             Vector3 start = isReversing ? to : from;
